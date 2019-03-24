@@ -1,0 +1,255 @@
+swagger: '2.0'
+info:
+  title: Leaseweb
+  description: Leaseweb api docs.
+  version: 1.0.0
+
+responses:
+  NotFound:
+    description: 'Entity not found'
+    schema:
+      $ref: '#/definitions/Error'
+  Empty:
+    description: 'Empty response'
+
+definitions:
+  Server:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 1
+      asset_id:
+        type: integer
+        example: 123
+      brand:
+        type: string
+        example: Dell
+      name:
+        type: string
+        example: R210
+      price:
+        type: integer
+        example: 100
+      created_at:
+        type: integer
+        example: 123214124
+      rams_count:
+        type: integer
+        example: 2
+  Ram:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 1
+      type:
+        type: string
+        example: 'DDR3'
+      size:
+        type: integer
+        example: 1
+      created_at:
+        type: integer
+        example: 123214124
+
+  Error:
+    type: object
+    properties:
+      message:
+        type: string
+        example: 'Error message'
+
+  ValidationError:
+    type: object
+    properties:
+      message:
+        type: string
+        example: 'This value is already used.'
+      name:
+        type: string
+        example: 'name'
+
+paths:
+  /api/servers:
+    get:
+      parameters:
+        - name: per_page
+          in: query
+          description: count per page
+          type: integer
+          default: 20
+        - name: page
+          in: query
+          description: page number
+          type: integer
+          default: 1
+      responses:
+        200:
+          description: List of servers
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Server'
+        204:
+          $ref: '#/responses/Empty'
+    post:
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                example: 'R210'
+              brand:
+                type: string
+                example: 'Dell'
+              asset_id:
+                type: integer
+                example: '1234'
+              price:
+                type: integer
+                example: 100
+              rams:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      example: 'DDR3'
+                    size:
+                      type: integer
+                      example: 1
+      responses:
+        201:
+          description: Created Server
+          schema:
+            $ref: '#/definitions/Server'
+        400:
+          description: "Validation error"
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: 'Server validation Exception.'
+              fields:
+                type: array
+                items:
+                  $ref: '#/definitions/ValidationError'
+  /api/servers/{id}:
+    delete:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: 'Delete server'
+          schema:
+            type: object
+        404:
+          $ref: '#/responses/NotFound'
+  /api/servers/{server_id}/rams:
+    get:
+      parameters:
+        - name: server_id
+          in: path
+          required: true
+          type: string
+        - name: per_page
+          in: query
+          description: count per page
+          type: integer
+        - name: page
+          in: query
+          description: page number
+          type: integer
+      responses:
+        200:
+          description: List rams of servers
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Ram'
+        204:
+          $ref: '#/responses/Empty'
+    post:
+      parameters:
+        - name: server_id
+          in: path
+          required: true
+          type: string
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: object
+            properties:
+              type:
+                type: string
+                example: 'DDR3'
+              size:
+                type: integer
+                example: 1
+      responses:
+        201:
+          description: Created ram
+          schema:
+            $ref: '#/definitions/Ram'
+        400:
+          description: "Validation error"
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: 'Ram validation Exception.'
+              fields:
+                type: array
+                items:
+                  $ref: '#/definitions/ValidationError'
+  /api/servers/{server_id}/ram/{id}:
+    get:
+      parameters:
+        - name: server_id
+          in: path
+          required: true
+          type: string
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: Return ram
+          schema:
+            $ref: '#/definitions/Ram'
+        404:
+          $ref: '#/responses/NotFound'
+
+    delete:
+      parameters:
+        - name: server_id
+          in: path
+          required: true
+          type: string
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: 'Delete ram of server'
+          schema:
+            type: object
+        404:
+          $ref: '#/responses/NotFound'
+
+host: young-waters-39571.herokuapp.com
+schemes: [https]
